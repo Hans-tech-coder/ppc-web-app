@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, use } from "react"
+import { useEffect, useState, use, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { doc, getDoc, collection, query, where, getDocs, runTransaction } from "firebase/firestore"
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label"
 import { GCashModal } from "@/components/public/gcash-modal"
 import { MapModal } from "@/components/public/map-modal"
 import { useAlert } from "@/components/alert-provider"
-import { formatTime } from "@/lib/utils"
+import { cn, formatTime } from "@/lib/utils"
 import { CalendarDays, Clock, MapPin, Loader2, Info } from "lucide-react"
 
 export default function RegisterPage(props: { params: Promise<{ sessionId: string }> }) {
@@ -36,6 +36,63 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
   const [isMember, setIsMember] = useState(false)
   const [checkingMember, setCheckingMember] = useState(false)
   const [priceToPay, setPriceToPay] = useState(0)
+
+  // Transitions Refs
+  const btnTextRef = useRef<HTMLSpanElement>(null)
+  const gcashWrapRef = useRef<HTMLDivElement>(null)
+  const gcashInputRef = useRef<HTMLInputElement>(null)
+  const [gcashError, setGcashError] = useState("Reference number is already used.")
+  const [showSuccess, setShowSuccess] = useState(false)
+
+  const swapBtnText = (next: string) => {
+    const el = btnTextRef.current
+    if (!el) return
+    el.classList.add("is-exit")
+    setTimeout(() => {
+      el.textContent = next
+      el.classList.remove("is-exit")
+      el.classList.add("is-enter-start")
+      void el.offsetHeight
+      el.classList.remove("is-enter-start")
+    }, 150)
+  }
+
+  const triggerErrorShake = (message: string) => {
+    const wrap = gcashWrapRef.current
+    const input = gcashInputRef.current
+    if (!wrap || !input) return
+    
+    setGcashError(message)
+    wrap.classList.add("is-error")
+    input.classList.add("is-error")
+    
+    input.classList.remove("is-shaking")
+    void input.offsetWidth
+    input.classList.add("is-shaking")
+    
+    setTimeout(() => input.classList.remove("is-shaking"), 280)
+    
+    if ((wrap as any)._revertTimer) clearTimeout((wrap as any)._revertTimer);
+    (wrap as any)._revertTimer = setTimeout(() => {
+      (wrap as any)._revertTimer = null
+      wrap.classList.remove("is-error")
+      input.classList.remove("is-error")
+    }, 3280)
+  }
+
+  const handleGcashChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRefNumber(e.target.value)
+    const wrap = gcashWrapRef.current
+    const input = gcashInputRef.current
+    if (wrap && input) {
+      if ((wrap as any)._revertTimer) {
+        clearTimeout((wrap as any)._revertTimer);
+        (wrap as any)._revertTimer = null
+      }
+      wrap.classList.remove("is-error")
+      input.classList.remove("is-error")
+    }
+  }
 
   // 1. Fetch Session Details
   useEffect(() => {
@@ -125,7 +182,6 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
         const sessionData = sessionDoc.data() as Session
         
         // Validation: Still open?
-        // Legacy sessions might not have a status field, treat undefined as OPEN
         if ((sessionData.status && sessionData.status !== "OPEN") || sessionData.registeredCount >= sessionData.maxPlayers) {
           throw new Error("Sorry, this session is now full or closed.")
         }
@@ -135,7 +191,7 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
         
         // Validation: Duplicate GCash reference?
         if (refDoc.exists()) {
-          throw new Error("This GCash reference number has already been used.")
+          throw new Error("Reference number already used.")
         }
 
         // Action 1: Create the lock for the reference number
@@ -170,24 +226,31 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
         return newRegRef.id // Return the generated unguessable ID
       })
 
-      // Success! Redirect to status page
-      router.push(`/status/${registrationId}`)
+      // Success! Swap text, show checkmark, and wait before redirecting
+      setShowSuccess(true)
+      swapBtnText("Registered!")
+      
+      setTimeout(() => {
+        router.push(`/status/${registrationId}`)
+      }, 1500)
       
     } catch (error: any) {
-      showAlert({
-        title: "Registration Failed",
-        description: error.message || "An error occurred during submission. Please try again."
-      })
-    } finally {
+      if (error.message === "Reference number already used.") {
+        triggerErrorShake(error.message)
+      } else {
+        showAlert({
+          title: "Registration Failed",
+          description: error.message || "An error occurred during submission. Please try again."
+        })
+      }
       setSubmitting(false)
     }
   }
 
-  if (loading) return <div className="text-center py-24">Loading session details...</div>
-  if (!session) return <div className="text-center py-24 text-red-500">Session not found.</div>
-  
-  // Legacy sessions might not have a status field, treat undefined as OPEN
-  if ((session.status && session.status !== "OPEN") || session.registeredCount >= session.maxPlayers) {
+  // Return early if the session is found but not open, to simplify the main return
+  const isSessionClosed = session && ((session.status && session.status !== "OPEN") || session.registeredCount >= session.maxPlayers);
+
+  if (isSessionClosed && !loading) {
     return (
       <div className="max-w-md mx-auto py-24 px-6 text-center">
         <h2 className="text-2xl font-bold mb-2 text-primary">Session Full</h2>
@@ -200,7 +263,21 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6">
+    <div className={cn("t-skel w-full", !loading && "is-revealed")}>
+      {/* 1. The Skeleton Layer */}
+      <div className="t-skel-skeleton is-pulsing flex justify-center py-12 px-4">
+        <Card className="w-full max-w-3xl h-[600px] bg-muted/20 border-border/50 rounded-2xl flex flex-col items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/30" />
+            <span className="mt-4 text-sm text-muted-foreground/50">Loading registration...</span>
+        </Card>
+      </div>
+
+      {/* 2. The Content Layer */}
+      <div className="t-skel-content">
+        {!loading && !session ? (
+          <div className="text-center py-24 text-red-500">Session not found.</div>
+        ) : session ? (
+          <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6">
       <Card className="rounded-2xl border-border/50">
         <CardHeader className="border-b border-dashed border-border/50">
           <CardTitle className="text-2xl text-primary">Register for Open Play</CardTitle>
@@ -216,7 +293,7 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
                 <MapPin className="h-4 w-4 mt-1 shrink-0" />
                 <div className="flex flex-col items-start">
                   <span className="text-foreground">{session.venueName}</span>
-                  <MapModal venueName={session.venueName} />
+                  <MapModal venueId={session.venueId} venueName={session.venueName} />
                 </div>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
@@ -289,16 +366,19 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
                 <p className="text-xs text-muted-foreground">Used to verify your member discount.</p>
               </div>
 
-              <div className="space-y-2">
+              <div className="t-input-wrap space-y-2" ref={gcashWrapRef}>
                 <Label htmlFor="refNumber">GCash Reference Number *</Label>
-                <Input 
-                  id="refNumber" 
-                  required
-                  placeholder="1234 5678 9101"
-                  className="bg-muted/30 border-muted-foreground/20 focus-visible:ring-primary/50"
-                  value={refNumber}
-                  onChange={(e) => setRefNumber(e.target.value)}
-                />
+                <div className="t-input rounded-md border border-input transition-colors overflow-hidden" ref={gcashInputRef}>
+                  <Input 
+                    id="refNumber" 
+                    placeholder="000 000 000 000"
+                    required
+                    value={refNumber}
+                    onChange={handleGcashChange}
+                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-muted/30"
+                  />
+                </div>
+                <p className="t-error-msg text-xs text-destructive mt-1 font-medium">{gcashError}</p>
                 <p className="text-xs text-muted-foreground">
                   Make sure you have correctly input the GCash reference number before submitting.
                 </p>
@@ -317,14 +397,29 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
                 <p className="text-xs text-muted-foreground">Max file size: 5MB</p>
               </div>
 
-              <Button type="submit" className="w-full mt-4" size="lg" disabled={submitting}>
-                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {submitting ? "Processing..." : "Submit Registration"}
+              <Button type="submit" className="w-full mt-4 flex items-center justify-center gap-2 overflow-hidden relative" size="lg" disabled={submitting || showSuccess}>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="t-success-check" data-state={showSuccess ? "in" : "out"} aria-hidden="true">
+                    <svg viewBox="0 0 48 48" fill="none" className="w-6 h-6 stroke-white stroke-2">
+                      <path d="M12 24L20 32L36 16" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                </div>
+                
+                <div className={cn("flex items-center gap-2 transition-opacity duration-300", showSuccess ? "opacity-0" : "opacity-100")}>
+                  {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                  <span className="t-text-swap font-medium" ref={btnTextRef}>
+                    Submit Registration
+                  </span>
+                </div>
               </Button>
             </form>
           </div>
         </div>
       </Card>
+    </div>
+        ) : null}
+      </div>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { Session } from "@/app/admin/sessions/page"
+import { AnimatedNumber } from "@/components/ui/animated-number"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn, formatTime } from "@/lib/utils"
@@ -98,21 +99,33 @@ export default function AdminDashboard() {
     }
   }, [])
 
-  if (loading) {
-    return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading dashboard data...</div>
-  }
-
   const pendingCount = needsAttentionRegs.filter(r => r.status === "PENDING").length;
   const actionReqCount = needsAttentionRegs.filter(r => r.status === "ACTION_REQUIRED").length;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
-          Welcome to the Paniqui Pickleball Club Admin Dashboard.
-        </p>
+    <div className={cn("space-y-8 t-skel", !loading && "is-revealed")}>
+      
+      {/* 1. Skeleton Layer */}
+      <div className="t-skel-skeleton is-pulsing absolute inset-0 space-y-8 pointer-events-none">
+        <div>
+          <div className="h-9 w-48 bg-muted rounded-md mb-2"></div>
+          <div className="h-5 w-72 bg-muted/60 rounded-md"></div>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-32 rounded-2xl bg-muted/20 border border-border/50"></div>
+          ))}
+        </div>
       </div>
+
+      {/* 2. Content Layer */}
+      <div className="t-skel-content space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground mt-2">
+            Welcome to the Paniqui Pickleball Club Admin Dashboard.
+          </p>
+        </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="rounded-2xl border-border/50 shadow-sm p-2">
@@ -121,15 +134,21 @@ export default function AdminDashboard() {
             <PhilippinePeso className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₱{totalRevenue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              <AnimatedNumber prefix="₱" value={totalRevenue.toLocaleString()} />
+            </div>
             <div className="text-xs text-muted-foreground mt-2 space-y-1">
               <div className="flex justify-between">
                 <span>Base Revenue:</span>
-                <span className="font-medium text-foreground">₱{(totalRevenue - nonMemberRevenue).toLocaleString()}</span>
+                <span className="font-medium text-foreground">
+                  <AnimatedNumber prefix="₱" value={(totalRevenue - nonMemberRevenue).toLocaleString()} />
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Non-Member Fees:</span>
-                <span className="font-medium text-foreground">₱{nonMemberRevenue.toLocaleString()}</span>
+                <span className="font-medium text-foreground">
+                  <AnimatedNumber prefix="₱" value={nonMemberRevenue.toLocaleString()} />
+                </span>
               </div>
             </div>
           </CardContent>
@@ -141,7 +160,9 @@ export default function AdminDashboard() {
             <CalendarDays className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{sessions.length}</div>
+            <div className="text-2xl font-bold">
+              <AnimatedNumber value={sessions.length} />
+            </div>
             <p className="text-xs text-muted-foreground mt-1">Open or Full sessions</p>
           </CardContent>
         </Card>
@@ -152,7 +173,9 @@ export default function AdminDashboard() {
             <AlertCircle className={`h-4 w-4 ${needsAttentionRegs.length > 0 ? 'text-orange-500' : 'text-muted-foreground'}`} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{needsAttentionRegs.length}</div>
+            <div className="text-2xl font-bold">
+              <AnimatedNumber value={needsAttentionRegs.length} />
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               {pendingCount} Pending, {actionReqCount} Action Req.
             </p>
@@ -165,7 +188,9 @@ export default function AdminDashboard() {
             <Clock4 className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalWaitlisted}</div>
+            <div className="text-2xl font-bold">
+              <AnimatedNumber value={totalWaitlisted} />
+            </div>
             <p className="text-xs text-muted-foreground mt-1">Players waiting for slots</p>
           </CardContent>
         </Card>
@@ -285,6 +310,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
+      </div>
     </div>
   )
 }

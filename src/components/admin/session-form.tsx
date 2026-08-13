@@ -148,7 +148,9 @@ export function SessionForm({ isOpen, onClose, initialData }: SessionFormProps) 
               onValueChange={(val) => setFormData({...formData, venueId: val ?? undefined})}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select venue" />
+                <SelectValue placeholder="Select venue">
+                  {formData.venueId ? venues.find(v => v.id === formData.venueId)?.name || formData.venueName || "Select venue" : "Select venue"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {venues.map(v => (

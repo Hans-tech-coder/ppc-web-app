@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/lib/auth-context";
 import { AlertProvider } from "@/components/alert-provider";
 import "./globals.css";
@@ -24,23 +23,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${robotoMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${robotoMono.variable} h-full antialiased dark`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            forcedTheme="dark"
-            disableTransitionOnChange
-        >
-            <AuthProvider>
-              <AlertProvider>
-                {children}
-              </AlertProvider>
-            </AuthProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <AlertProvider>
+            {children}
+          </AlertProvider>
+        </AuthProvider>
       </body>
     </html>
   );

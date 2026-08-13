@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -10,21 +11,38 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { MapPin, Navigation } from "lucide-react"
+import { doc, getDoc } from "firebase/firestore"
+import { db } from "@/lib/firebase"
 
 interface MapModalProps {
+  venueId?: string
   venueName: string
   address?: string
   mapsLink?: string
 }
 
-export function MapModal({ venueName, address, mapsLink }: MapModalProps) {
+export function MapModal({ venueId, venueName, address: initialAddress, mapsLink: initialMapsLink }: MapModalProps) {
+  const [address, setAddress] = useState(initialAddress || "")
+  const [mapsLink, setMapsLink] = useState(initialMapsLink || "")
+
+  useEffect(() => {
+    if (venueId && (!initialAddress || !initialMapsLink)) {
+      getDoc(doc(db, "venues", venueId)).then(snap => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.address) setAddress(data.address);
+          if (data.mapsLink) setMapsLink(data.mapsLink);
+        }
+      }).catch(console.error)
+    }
+  }, [venueId, initialAddress, initialMapsLink])
+
   // If we don't have a specific maps link, we'll try to search Google Maps by name
   const googleMapsUrl = mapsLink || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address || venueName)}`
   
   // Create an embed URL
   const queryText = address ? `${venueName}, ${address}` : venueName
-  // The +(Label) syntax forces the iframe to pin a specific label rather than a vague region
-  const embedQuery = `${encodeURIComponent(queryText)}+(${encodeURIComponent(venueName)})`
+  const embedQuery = encodeURIComponent(queryText)
   const embedUrl = `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${embedQuery}&t=&z=16&ie=UTF8&iwloc=B&output=embed`
 
   return (

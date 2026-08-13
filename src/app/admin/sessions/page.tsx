@@ -76,24 +76,45 @@ export default function SessionsPage() {
         </Button>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead className="hidden md:table-cell">Time</TableHead>
-              <TableHead className="hidden md:table-cell">Venue</TableHead>
-              <TableHead className="text-right">Players</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="w-[100px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
+      <div className={cn("rounded-md border t-skel relative overflow-hidden", !loading && "is-revealed")}>
+        
+        {/* Skeleton Layer */}
+        <div className="t-skel-skeleton is-pulsing pointer-events-none p-4 space-y-4 bg-card">
+          <div className="flex gap-4 border-b pb-4">
+            <div className="h-4 w-24 bg-muted rounded"></div>
+            <div className="h-4 w-32 bg-muted rounded hidden md:block"></div>
+            <div className="h-4 w-48 bg-muted rounded hidden md:block"></div>
+            <div className="h-4 w-16 bg-muted rounded ml-auto"></div>
+          </div>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex gap-4 border-b pb-4">
+              <div className="h-4 w-24 bg-muted/60 rounded"></div>
+              <div className="h-4 w-32 bg-muted/60 rounded hidden md:block"></div>
+              <div className="h-4 w-48 bg-muted/60 rounded hidden md:block"></div>
+              <div className="h-4 w-16 bg-muted/60 rounded ml-auto"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Content Layer */}
+        <div className="t-skel-content">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="text-center h-24">Loading...</TableCell>
+                <TableHead>Date</TableHead>
+                <TableHead className="hidden md:table-cell">Time</TableHead>
+                <TableHead className="hidden md:table-cell">Venue</TableHead>
+                <TableHead className="text-right">Players</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="w-[100px]"></TableHead>
               </TableRow>
-            ) : sessions.length === 0 ? (
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center h-48 opacity-0">Loading...</TableCell>
+                </TableRow>
+              ) : sessions.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
                   No sessions found. Schedule one to get started.
@@ -130,8 +151,9 @@ export default function SessionsPage() {
                 </TableRow>
               ))
             )}
-          </TableBody>
-        </Table>
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       <SessionForm 

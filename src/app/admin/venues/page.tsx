@@ -7,6 +7,7 @@ import { VenueForm } from "@/components/admin/venue-form"
 import { Button } from "@/components/ui/button"
 import { Table, TableCell, TableHead, TableHeader, TableRow, TableBody } from "@/components/ui/table"
 import { Plus, MapPin } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface Venue {
   id: string;
@@ -61,22 +62,43 @@ export default function VenuesPage() {
         </Button>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead className="text-right">Courts</TableHead>
-              <TableHead className="w-[100px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
+      <div className={cn("rounded-md border t-skel relative overflow-hidden", !loading && "is-revealed")}>
+        
+        {/* Skeleton Layer */}
+        <div className="t-skel-skeleton is-pulsing pointer-events-none p-4 space-y-4 bg-card">
+          <div className="flex gap-4 border-b pb-4">
+            <div className="h-4 w-32 bg-muted rounded"></div>
+            <div className="h-4 w-48 bg-muted rounded"></div>
+            <div className="h-4 w-16 bg-muted rounded ml-auto"></div>
+            <div className="h-4 w-16 bg-muted rounded"></div>
+          </div>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex gap-4 border-b pb-4">
+              <div className="h-4 w-32 bg-muted/60 rounded"></div>
+              <div className="h-4 w-48 bg-muted/60 rounded"></div>
+              <div className="h-4 w-16 bg-muted/60 rounded ml-auto"></div>
+              <div className="h-4 w-16 bg-muted/60 rounded"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Content Layer */}
+        <div className="t-skel-content">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={4} className="text-center h-24">Loading...</TableCell>
+                <TableHead>Name</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead className="text-right">Courts</TableHead>
+                <TableHead className="w-[100px]"></TableHead>
               </TableRow>
-            ) : venues.length === 0 ? (
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center h-48 opacity-0">Loading...</TableCell>
+                </TableRow>
+              ) : venues.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
                   No venues found. Add one to get started.
@@ -105,8 +127,9 @@ export default function VenuesPage() {
                 </TableRow>
               ))
             )}
-          </TableBody>
-        </Table>
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       <VenueForm 

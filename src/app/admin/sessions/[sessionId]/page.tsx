@@ -25,7 +25,14 @@ import {
   DialogDescription
 } from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { ArrowLeft, Loader2, ExternalLink, Image as ImageIcon, MapPin, CalendarDays, Clock, Users, MessageSquare } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
+import { ArrowLeft, Loader2, ExternalLink, Image as ImageIcon, MapPin, CalendarDays, Clock, Users, MessageSquare, MoreVertical, CheckCircle2, XCircle } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { useAlert } from "@/components/alert-provider"
 
@@ -309,12 +316,58 @@ export default function SessionDashboard(props: { params: Promise<{ sessionId: s
                               <DialogHeader>
                                 <DialogTitle>Proof of Payment</DialogTitle>
                               </DialogHeader>
-                              <div className="mt-4">
-                                <img src={reg.proofUrl} alt="Payment Proof" className="w-full rounded-md object-contain max-h-[60vh]" />
-                                <div className="mt-4 text-sm flex justify-between">
-                                  <span className="text-muted-foreground">Ref Number:</span>
-                                  <span className="font-medium">{reg.referenceNumber}</span>
+                              <div className="mt-4 space-y-4">
+                                <div className="bg-muted p-3 rounded-lg border">
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="font-semibold">{reg.name}</span>
+                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                        reg.isMember ? 'bg-blue-500/20 text-blue-700 dark:text-blue-400' : 'bg-gray-500/20 text-gray-700 dark:text-gray-400'
+                                    }`}>
+                                      {reg.isMember ? 'MEMBER' : 'GUEST'}
+                                    </span>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground flex flex-col gap-0.5">
+                                    <span>{reg.contactNumber}</span>
+                                    <span>{reg.email}</span>
+                                  </div>
                                 </div>
+                                <div className="relative w-full rounded-md overflow-hidden min-h-[300px] bg-muted group/skel transition-all duration-300">
+                                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-muted animate-pulse">
+                                    <ImageIcon className="h-8 w-8 text-muted-foreground opacity-50" />
+                                  </div>
+                                  <img 
+                                    src={reg.proofUrl} 
+                                    alt={`Payment Proof for ${reg.name}`} 
+                                    className="relative z-20 w-full h-auto object-contain max-h-[60vh] opacity-0 blur-sm transition-all duration-500" 
+                                    onLoad={(e) => {
+                                      const skel = e.currentTarget.previousElementSibling;
+                                      if (skel) {
+                                        skel.classList.add('opacity-0');
+                                        skel.classList.remove('animate-pulse');
+                                        skel.classList.add('transition-opacity', 'duration-500');
+                                      }
+                                      e.currentTarget.classList.remove('opacity-0', 'blur-sm');
+                                      e.currentTarget.classList.add('opacity-100', 'blur-0');
+                                      
+                                      const parent = e.currentTarget.parentElement;
+                                      if (parent) {
+                                        parent.classList.remove('min-h-[300px]');
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <div className="text-sm flex justify-between bg-muted/50 p-2 rounded-md">
+                                  <span className="text-muted-foreground">Ref Number:</span>
+                                  <span className="font-medium tracking-wide">{reg.referenceNumber}</span>
+                                </div>
+                                {(reg.status === 'PENDING' || reg.status === 'ACTION_REQUIRED') && (
+                                  <div className="pt-2 flex gap-3">
+                                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white" onClick={() => handleApprove(reg.id)}>
+                                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                                      Approve Registration
+                                    </Button>
+                                  </div>
+                                )}
                               </div>
                             </DialogContent>
                           </Dialog>
@@ -329,19 +382,32 @@ export default function SessionDashboard(props: { params: Promise<{ sessionId: s
                             {reg.status === 'ACTION_REQUIRED' ? 'ACTION REQ.' : reg.status}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right space-x-2">
+                        <TableCell className="text-right">
                           {(reg.status === 'PENDING' || reg.status === 'ACTION_REQUIRED') && (
-                            <>
-                              <Button variant="default" size="sm" onClick={() => handleApprove(reg.id)}>Approve</Button>
-                              <Button variant="outline" size="sm" onClick={() => {
-                                setMessagingReg(reg)
-                                setMessageContent(reg.adminMessage || "")
-                              }}>
-                                <MessageSquare className="h-3 w-3 mr-1" />
-                                Message
-                              </Button>
-                              <Button variant="destructive" size="sm" onClick={() => handleReject(reg)}>Reject</Button>
-                            </>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-8 w-8 rounded-full")}>
+                                <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                                <span className="sr-only">Open menu</span>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-[160px]">
+                                <DropdownMenuItem onClick={() => handleApprove(reg.id)} className="text-green-600 dark:text-green-400 focus:text-green-600 dark:focus:text-green-400 cursor-pointer">
+                                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                                  Approve
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                  setMessagingReg(reg)
+                                  setMessageContent(reg.adminMessage || "")
+                                }} className="cursor-pointer">
+                                  <MessageSquare className="mr-2 h-4 w-4" />
+                                  Message
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleReject(reg)} className="text-destructive focus:text-destructive cursor-pointer">
+                                  <XCircle className="mr-2 h-4 w-4" />
+                                  Reject
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         </TableCell>
                       </TableRow>
