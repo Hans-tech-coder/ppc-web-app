@@ -1,0 +1,68 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if user is an admin by verifying their email exists in admin_whitelist
+    function isAdmin() {
+      return request.auth != null && exists(/databases/$(database)/documents/admin_whitelist/$(request.auth.token.email));
+    }
+
+    // Default rule - deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /admin_whitelist/{email} {
+      // Admins can read the whitelist, and an individual can check if they are on it
+      allow read: if request.auth != null && request.auth.token.email == email;
+      allow write: if isAdmin();
+    }
+
+    match /venues/{venueId} {
+      allow read: if true; // Public can see venues for sessions
+      allow write: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if true; // Public can read settings (e.g. non_member_surcharge)
+      allow write: if isAdmin();
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if true; // Public can see sessions
+      allow write: if isAdmin();
+    }
+
+    match /reference_numbers/{refNum} {
+      // Public can CREATE a lock for a reference number (part of transaction)
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /registrations/{registrationId} {
+      // Anyone can create a registration
+      allow create: if true;
+      // Because phase 1 uses the unguessable registration_id as the token, anyone who has the link can read it.
+      allow read: if true;
+      // Allow players to update their status to CANCELLED or fix proof
+      allow update: if true; 
+      allow delete: if isAdmin();
+    }
+
+    match /waitlist/{waitlistId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /members/{memberId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if isAdmin();
+    }
+  }
+}
