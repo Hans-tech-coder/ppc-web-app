@@ -11,7 +11,7 @@ export const HeroSection = () => {
     return (
         <div className="relative">
             <header>
-                <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl rounded-full border border-zinc-800 bg-zinc-950/80 backdrop-blur-md md:relative md:top-6">
+                <nav className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl rounded-full border border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
                     <div className="px-6 py-3 lg:py-4">
                         <div className="flex items-center justify-between">
                             <Link
@@ -22,7 +22,7 @@ export const HeroSection = () => {
                                 <span className="font-bold text-lg hidden sm:block text-white">Paniqui Pickleball</span>
                             </Link>
 
-                            <Link href="/admin/login" className={cn(buttonVariants({ size: "sm", variant: "neon" }), "rounded-full px-4 font-medium")}>
+                            <Link href="/admin/login" className={cn(buttonVariants({ variant: "neon" }), "rounded-full px-6 font-medium")}>
                                 <span>Admin Login</span>
                             </Link>
                         </div>
@@ -44,12 +44,10 @@ export const HeroSection = () => {
                     <div className="relative mx-auto max-w-5xl px-6">
                         <div className="relative z-10 mx-auto max-w-3xl text-center">
                             <h1 className="text-balance text-5xl font-bold tracking-tight md:text-6xl lg:text-7xl mb-6">
-                                <span className="text-white">Building strong & impactful </span>
-                                <span className="text-gradient-primary">pickleball community</span>
+                                <span className="text-gradient-primary">Play. Progress. Connect.</span>
                             </h1>
                             <p className="mx-auto mb-10 max-w-2xl text-lg text-zinc-400 font-medium">
-                                Join the premier pickleball club in Paniqui. Connect with players, 
-                                reserve your spot for open plays, and elevate your game on the courts.
+                                More Than a Game, We Build a Community.
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

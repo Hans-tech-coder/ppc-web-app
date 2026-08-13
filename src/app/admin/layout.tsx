@@ -3,6 +3,7 @@
 import { AdminGuard } from "@/components/admin-guard"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { LayoutDashboard, MapPin, CalendarDays, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -32,7 +33,10 @@ export default function AdminLayout({
       <div className="min-h-[100dvh] flex flex-col bg-background pb-[calc(env(safe-area-inset-bottom)+64px)] md:pb-0">
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between p-4 border-b border-border/50 bg-card sticky top-0 z-40">
-          <h2 className="text-lg font-bold text-primary tracking-tight">PPC Admin</h2>
+          <div className="flex items-center gap-3">
+            <Image src="/ppc-logo.png" alt="PPC Logo" width={32} height={32} className="rounded-md object-contain" />
+            <h2 className="text-lg font-bold text-primary tracking-tight">Admin</h2>
+          </div>
           <Button variant="ghost" size="icon" onClick={() => signOut()} className="text-muted-foreground hover:text-foreground h-8 w-8">
             <LogOut className="h-4 w-4" />
           </Button>
@@ -40,8 +44,9 @@ export default function AdminLayout({
 
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex w-64 border-r border-border/50 bg-card flex-col fixed inset-y-0 left-0 z-40">
-          <div className="p-6 border-b border-border/50">
-            <h2 className="text-xl font-bold text-primary tracking-tight">PPC Admin</h2>
+          <div className="p-6 border-b border-border/50 flex items-center gap-3">
+            <Image src="/ppc-logo.png" alt="PPC Logo" width={40} height={40} className="rounded-md object-contain" />
+            <h2 className="text-xl font-bold text-primary tracking-tight">Admin</h2>
           </div>
           
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">

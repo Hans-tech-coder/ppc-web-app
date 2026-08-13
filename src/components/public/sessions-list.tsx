@@ -47,12 +47,12 @@ export function SessionsList() {
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto px-6 relative z-10" id="sessions">
+    <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto px-6 relative z-10" id="sessions">
       {sessions.map((session) => {
         const isFull = session.registeredCount >= session.maxPlayers;
         
         return (
-          <Card key={session.id} className="flex flex-col bg-zinc-900/50 border-zinc-800/50 backdrop-blur-md hover:border-primary/50 transition-colors duration-300">
+          <Card key={session.id} className="flex flex-col bg-zinc-900/50 border-zinc-800/50 backdrop-blur-md hover:border-primary/50 transition-colors duration-300 w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] max-w-sm">
             <CardHeader className="space-y-4">
               <div className="flex flex-col items-start gap-3 w-full">
                 <CardTitle className="text-xl font-bold text-white leading-tight">
