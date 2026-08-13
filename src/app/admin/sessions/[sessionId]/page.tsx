@@ -270,53 +270,204 @@ export default function SessionDashboard(props: { params: Promise<{ sessionId: s
           </div>
 
           {activeTab === "registrations" && (
-            <div className="rounded-md border bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Player</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Paid</TableHead>
-                    <TableHead>Proof</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {registrations.length === 0 ? (
+            <div className="md:rounded-md md:border bg-transparent md:bg-card">
+              {/* Desktop Table Layout */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
-                        No registrations yet.
-                      </TableCell>
+                      <TableHead>Player</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Paid</TableHead>
+                      <TableHead>Proof</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ) : (
-                    registrations.map((reg) => (
-                      <TableRow key={reg.id}>
-                        <TableCell>
-                          <div className="font-medium">{reg.name}</div>
-                          <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                            {reg.isMember && <span className="bg-primary/20 text-primary px-1.5 rounded uppercase text-[10px]">Member</span>}
+                  </TableHeader>
+                  <TableBody>
+                    {registrations.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                          No registrations yet.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      registrations.map((reg) => (
+                        <TableRow key={reg.id}>
+                          <TableCell>
+                            <div className="font-medium">{reg.name}</div>
+                            <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              {reg.isMember && <span className="bg-primary/20 text-primary px-1.5 rounded uppercase text-[10px]">Member</span>}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">{reg.contactNumber}</div>
+                            <div className="text-xs text-muted-foreground">{reg.email}</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium">₱{reg.pricePaid}</div>
+                            <div className="text-xs text-muted-foreground truncate w-24" title={reg.referenceNumber}>Ref: {reg.referenceNumber}</div>
+                          </TableCell>
+                          <TableCell>
+                            <Dialog>
+                              <DialogTrigger className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-8")}>
+                                  <ImageIcon className="h-3 w-3 mr-2" />
+                                  View
+                              </DialogTrigger>
+                              <DialogContent className="max-w-md">
+                                <DialogHeader>
+                                  <DialogTitle>Proof of Payment</DialogTitle>
+                                </DialogHeader>
+                                <div className="mt-4 space-y-4">
+                                  <div className="bg-muted p-3 rounded-lg border">
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="font-semibold">{reg.name}</span>
+                                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                          reg.isMember ? 'bg-blue-500/20 text-blue-700 dark:text-blue-400' : 'bg-gray-500/20 text-gray-700 dark:text-gray-400'
+                                      }`}>
+                                        {reg.isMember ? 'MEMBER' : 'GUEST'}
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-muted-foreground flex flex-col gap-0.5">
+                                      <span>{reg.contactNumber}</span>
+                                      <span>{reg.email}</span>
+                                    </div>
+                                  </div>
+                                  <div className="relative w-full rounded-md overflow-hidden min-h-[300px] bg-muted group/skel transition-all duration-300">
+                                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-muted animate-pulse">
+                                      <ImageIcon className="h-8 w-8 text-muted-foreground opacity-50" />
+                                    </div>
+                                    <img 
+                                      src={reg.proofUrl} 
+                                      alt={`Payment Proof for ${reg.name}`} 
+                                      className="relative z-20 w-full h-auto object-contain max-h-[60vh] opacity-0 blur-sm transition-all duration-500" 
+                                      onLoad={(e) => {
+                                        const skel = e.currentTarget.previousElementSibling;
+                                        if (skel) {
+                                          skel.classList.add('opacity-0');
+                                          skel.classList.remove('animate-pulse');
+                                          skel.classList.add('transition-opacity', 'duration-500');
+                                        }
+                                        e.currentTarget.classList.remove('opacity-0', 'blur-sm');
+                                        e.currentTarget.classList.add('opacity-100', 'blur-0');
+                                        
+                                        const parent = e.currentTarget.parentElement;
+                                        if (parent) {
+                                          parent.classList.remove('min-h-[300px]');
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="text-sm flex justify-between bg-muted/50 p-2 rounded-md">
+                                    <span className="text-muted-foreground">Ref Number:</span>
+                                    <span className="font-medium tracking-wide">{reg.referenceNumber}</span>
+                                  </div>
+                                  {(reg.status === 'PENDING' || reg.status === 'ACTION_REQUIRED') && (
+                                    <div className="pt-2 flex gap-3">
+                                      <Button className="w-full bg-green-600 hover:bg-green-700 text-white" onClick={() => handleApprove(reg.id)}>
+                                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                                        Approve Registration
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </TableCell>
+                          <TableCell>
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                reg.status === 'APPROVED' ? 'bg-green-500/20 text-green-700 dark:text-green-400' :
+                                reg.status === 'REJECTED' ? 'bg-red-500/20 text-red-700 dark:text-red-400' :
+                                reg.status === 'ACTION_REQUIRED' ? 'bg-orange-500/20 text-orange-700 dark:text-orange-400' :
+                                'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400'
+                            }`}>
+                              {reg.status === 'ACTION_REQUIRED' ? 'ACTION REQ.' : reg.status}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {(reg.status === 'PENDING' || reg.status === 'ACTION_REQUIRED') && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-8 w-8 rounded-full")}>
+                                  <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                                  <span className="sr-only">Open menu</span>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-[160px]">
+                                  <DropdownMenuItem onClick={() => handleApprove(reg.id)} className="text-green-600 dark:text-green-400 focus:text-green-600 dark:focus:text-green-400 cursor-pointer">
+                                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                                    Approve
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
+                                    setMessagingReg(reg)
+                                    setMessageContent(reg.adminMessage || "")
+                                  }} className="cursor-pointer">
+                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    Message
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => handleReject(reg)} className="text-destructive focus:text-destructive cursor-pointer">
+                                    <XCircle className="mr-2 h-4 w-4" />
+                                    Reject
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Card Layout */}
+              <div className="md:hidden py-2 -mx-4 px-4 md:mx-0 md:px-0">
+                {registrations.length === 0 ? (
+                  <div className="text-center h-24 text-muted-foreground pt-8">
+                    No registrations yet.
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {registrations.map((reg) => (
+                      <div key={reg.id} className="bg-card border rounded-xl p-4 shadow-sm flex flex-col gap-4 relative">
+                        <div className="flex justify-between items-start gap-2 border-b pb-3">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-base">{reg.name}</h3>
+                              {reg.isMember && <span className="bg-primary/20 text-primary px-1.5 py-0.5 rounded uppercase text-[10px] font-bold">Member</span>}
+                            </div>
+                            <div className="text-sm text-muted-foreground mt-1">
+                              {reg.contactNumber}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {reg.email}
+                            </div>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">{reg.contactNumber}</div>
-                          <div className="text-xs text-muted-foreground">{reg.email}</div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-medium">₱{reg.pricePaid}</div>
-                          <div className="text-xs text-muted-foreground truncate w-24" title={reg.referenceNumber}>Ref: {reg.referenceNumber}</div>
-                        </TableCell>
-                        <TableCell>
+                          <span className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                              reg.status === 'APPROVED' ? 'bg-green-500/20 text-green-700 dark:text-green-400' :
+                              reg.status === 'REJECTED' ? 'bg-red-500/20 text-red-700 dark:text-red-400' :
+                              reg.status === 'ACTION_REQUIRED' ? 'bg-orange-500/20 text-orange-700 dark:text-orange-400' :
+                              'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400'
+                          }`}>
+                            {reg.status === 'ACTION_REQUIRED' ? 'ACTION REQ.' : reg.status}
+                          </span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center bg-muted/30 rounded-lg p-3 text-sm">
+                          <div>
+                            <div className="font-medium text-lg">₱{reg.pricePaid}</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">Ref: {reg.referenceNumber}</div>
+                          </div>
+                          
                           <Dialog>
-                            <DialogTrigger className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-8")}>
-                                <ImageIcon className="h-3 w-3 mr-2" />
-                                View
+                            <DialogTrigger className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-9 rounded-lg")}>
+                                <ImageIcon className="h-4 w-4 mr-2" />
+                                View Proof
                             </DialogTrigger>
-                            <DialogContent className="max-w-md">
+                            <DialogContent className="max-w-md w-[95vw] rounded-xl p-4">
                               <DialogHeader>
                                 <DialogTitle>Proof of Payment</DialogTitle>
                               </DialogHeader>
-                              <div className="mt-4 space-y-4">
+                              <div className="mt-2 space-y-4">
                                 <div className="bg-muted p-3 rounded-lg border">
                                   <div className="flex justify-between items-center mb-1">
                                     <span className="font-semibold">{reg.name}</span>
@@ -360,104 +511,141 @@ export default function SessionDashboard(props: { params: Promise<{ sessionId: s
                                   <span className="text-muted-foreground">Ref Number:</span>
                                   <span className="font-medium tracking-wide">{reg.referenceNumber}</span>
                                 </div>
-                                {(reg.status === 'PENDING' || reg.status === 'ACTION_REQUIRED') && (
-                                  <div className="pt-2 flex gap-3">
-                                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white" onClick={() => handleApprove(reg.id)}>
-                                      <CheckCircle2 className="h-4 w-4 mr-2" />
-                                      Approve Registration
-                                    </Button>
-                                  </div>
-                                )}
                               </div>
                             </DialogContent>
                           </Dialog>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                              reg.status === 'APPROVED' ? 'bg-green-500/20 text-green-700 dark:text-green-400' :
-                              reg.status === 'REJECTED' ? 'bg-red-500/20 text-red-700 dark:text-red-400' :
-                              reg.status === 'ACTION_REQUIRED' ? 'bg-orange-500/20 text-orange-700 dark:text-orange-400' :
-                              'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400'
-                          }`}>
-                            {reg.status === 'ACTION_REQUIRED' ? 'ACTION REQ.' : reg.status}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {(reg.status === 'PENDING' || reg.status === 'ACTION_REQUIRED') && (
+                        </div>
+
+                        {(reg.status === 'PENDING' || reg.status === 'ACTION_REQUIRED') && (
+                          <div className="grid grid-cols-2 gap-2 pt-2 border-t">
+                            <Button 
+                              variant="outline" 
+                              className="w-full rounded-lg bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 border-green-500/20" 
+                              onClick={() => handleApprove(reg.id)}
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-2" />
+                              Approve
+                            </Button>
+                            
                             <DropdownMenu>
-                              <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-8 w-8 rounded-full")}>
-                                <MoreVertical className="h-4 w-4 text-muted-foreground" />
-                                <span className="sr-only">Open menu</span>
+                              <DropdownMenuTrigger className={cn(buttonVariants({ variant: "outline" }), "w-full rounded-lg")}>
+                                <MoreVertical className="h-4 w-4 mr-2" />
+                                More Actions
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-[160px]">
-                                <DropdownMenuItem onClick={() => handleApprove(reg.id)} className="text-green-600 dark:text-green-400 focus:text-green-600 dark:focus:text-green-400 cursor-pointer">
-                                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                                  Approve
-                                </DropdownMenuItem>
+                              <DropdownMenuContent align="end" className="w-[200px]">
                                 <DropdownMenuItem onClick={() => {
                                   setMessagingReg(reg)
                                   setMessageContent(reg.adminMessage || "")
-                                }} className="cursor-pointer">
+                                }} className="cursor-pointer py-3">
                                   <MessageSquare className="mr-2 h-4 w-4" />
-                                  Message
+                                  Message Player
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleReject(reg)} className="text-destructive focus:text-destructive cursor-pointer">
+                                <DropdownMenuItem onClick={() => handleReject(reg)} className="text-destructive focus:text-destructive cursor-pointer py-3">
                                   <XCircle className="mr-2 h-4 w-4" />
-                                  Reject
+                                  Reject Registration
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {activeTab === "waitlist" && (
-            <div className="rounded-md border bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-16">#</TableHead>
-                    <TableHead>Player</TableHead>
-                    <TableHead>Contact Info</TableHead>
-                    <TableHead>Joined At</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {waitlist.length === 0 ? (
+            <div className="md:rounded-md md:border bg-transparent md:bg-card">
+              {/* Desktop Table Layout */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
-                        Waitlist is empty.
-                      </TableCell>
+                      <TableHead className="w-16">#</TableHead>
+                      <TableHead>Player</TableHead>
+                      <TableHead>Contact Info</TableHead>
+                      <TableHead>Joined At</TableHead>
                     </TableRow>
-                  ) : (
-                    waitlist.map((entry, idx) => (
-                      <TableRow key={entry.id}>
-                        <TableCell className="font-medium text-muted-foreground">{idx + 1}</TableCell>
-                        <TableCell className="font-medium">{entry.name}</TableCell>
-                        <TableCell>
-                          <div className="text-sm">{entry.contactNumber}</div>
-                          <div className="text-xs text-muted-foreground">{entry.email}</div>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {new Date(entry.createdAt).toLocaleString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit'
-                          })}
+                  </TableHeader>
+                  <TableBody>
+                    {waitlist.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
+                          Waitlist is empty.
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    ) : (
+                      waitlist.map((entry, idx) => (
+                        <TableRow key={entry.id}>
+                          <TableCell className="font-medium text-muted-foreground">{idx + 1}</TableCell>
+                          <TableCell className="font-medium">{entry.name}</TableCell>
+                          <TableCell>
+                            <div className="text-sm">{entry.contactNumber}</div>
+                            <div className="text-xs text-muted-foreground">{entry.email}</div>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {new Date(entry.createdAt).toLocaleString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric',
+                              hour: 'numeric',
+                              minute: '2-digit'
+                            })}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Card Layout */}
+              <div className="md:hidden py-2 -mx-4 px-4 md:mx-0 md:px-0">
+                {waitlist.length === 0 ? (
+                  <div className="text-center h-24 text-muted-foreground pt-8">
+                    Waitlist is empty.
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {waitlist.map((entry, idx) => (
+                      <div key={entry.id} className="bg-card border rounded-xl p-4 shadow-sm flex flex-col gap-3 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-primary/50"></div>
+                        <div className="flex items-center gap-3 ml-2 border-b pb-2">
+                          <div className="bg-muted h-8 w-8 rounded-full flex items-center justify-center font-bold text-muted-foreground text-xs">
+                            {idx + 1}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-base">{entry.name}</h3>
+                          </div>
+                        </div>
+                        
+                        <div className="ml-2 bg-muted/30 rounded-lg p-3 text-sm flex flex-col gap-1.5 mt-1">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Phone</span>
+                            <span className="font-medium">{entry.contactNumber}</span>
+                          </div>
+                          {entry.email && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Email</span>
+                              <span className="font-medium truncate max-w-[150px]">{entry.email}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between border-t border-border/50 pt-1.5 mt-0.5">
+                            <span className="text-muted-foreground">Joined</span>
+                            <span className="font-medium text-right">
+                              {new Date(entry.createdAt).toLocaleString('en-US', { 
+                                month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

@@ -76,7 +76,7 @@ export default function SessionsPage() {
         </Button>
       </div>
 
-      <div className={cn("rounded-md border t-skel relative overflow-hidden", !loading && "is-revealed")}>
+      <div className={cn("md:rounded-md md:border t-skel relative md:overflow-hidden", !loading && "is-revealed")}>
         
         {/* Skeleton Layer */}
         <div className="t-skel-skeleton is-pulsing pointer-events-none p-4 space-y-4 bg-card">
@@ -96,14 +96,14 @@ export default function SessionsPage() {
           ))}
         </div>
 
-        {/* Content Layer */}
-        <div className="t-skel-content">
+        {/* Desktop Table Layout */}
+        <div className="t-skel-content hidden md:block">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
-                <TableHead className="hidden md:table-cell">Time</TableHead>
-                <TableHead className="hidden md:table-cell">Venue</TableHead>
+                <TableHead>Time</TableHead>
+                <TableHead>Venue</TableHead>
                 <TableHead className="text-right">Players</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
@@ -126,8 +126,8 @@ export default function SessionsPage() {
                   <TableCell className="font-medium">
                     {new Date(session.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">{formatTime(session.startTime)} - {formatTime(session.endTime)}</TableCell>
-                  <TableCell className="hidden md:table-cell">{session.venueName}</TableCell>
+                  <TableCell>{formatTime(session.startTime)} - {formatTime(session.endTime)}</TableCell>
+                  <TableCell>{session.venueName}</TableCell>
                   <TableCell className="text-right">
                     {session.registeredCount} / {session.maxPlayers}
                   </TableCell>
@@ -153,6 +153,61 @@ export default function SessionsPage() {
             )}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Mobile Card Layout */}
+        <div className="t-skel-content md:hidden py-2 -mx-4 px-4 md:mx-0 md:px-0">
+          {loading ? (
+             <div className="text-center h-48 opacity-0">Loading...</div>
+          ) : sessions.length === 0 ? (
+            <div className="text-center h-24 text-muted-foreground pt-8">
+              No sessions found. Schedule one to get started.
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {sessions.map((session) => (
+                <div key={session.id} className="bg-card border rounded-xl p-4 shadow-sm flex flex-col gap-3 relative">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <h3 className="font-semibold text-base">
+                        {new Date(session.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                      </h3>
+                      <div className="text-sm text-muted-foreground mt-0.5">
+                        {formatTime(session.startTime)} - {formatTime(session.endTime)}
+                      </div>
+                    </div>
+                    <span className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                        session.status === 'OPEN' ? 'bg-green-500/20 text-green-700 dark:text-green-400' :
+                        session.status === 'FULL' ? 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' :
+                        'bg-red-500/20 text-red-700 dark:text-red-400'
+                    }`}>
+                      {session.status}
+                    </span>
+                  </div>
+                  
+                  <div className="bg-muted/30 rounded-lg p-3 text-sm flex flex-col gap-1.5">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Venue</span>
+                      <span className="font-medium text-right">{session.venueName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Players</span>
+                      <span className="font-medium text-right">{session.registeredCount} / {session.maxPlayers}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <Link href={`/admin/sessions/${session.id}`} className={cn(buttonVariants({ variant: "default", size: "sm" }), "flex-1 rounded-lg h-9")}>
+                      Manage
+                    </Link>
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(session)} className="flex-1 rounded-lg h-9">
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

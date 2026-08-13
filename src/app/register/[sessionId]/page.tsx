@@ -118,25 +118,35 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
   // 2. Check Membership Status on Blur
   const checkMembership = async () => {
     if (!session) return;
-    if ((!contactNumber || contactNumber.length < 10) && (!email || !email.includes('@'))) return;
+    
+    const hasValidContact = contactNumber && contactNumber.length >= 10;
+    const hasValidEmail = email && email.includes('@');
+    
+    if (!hasValidContact && !hasValidEmail) return;
     
     setCheckingMember(true)
     try {
       const membersRef = collection(db, "members")
+      const snap = await getDocs(membersRef)
+      
       let foundMember = false;
-
-      // Check contact number first
-      if (contactNumber && contactNumber.length >= 10) {
-        const q1 = query(membersRef, where("contactNumber", "==", contactNumber))
-        const snap1 = await getDocs(q1)
-        if (!snap1.empty) foundMember = true;
-      }
-
-      // Check email if contact number didn't match
-      if (!foundMember && email && email.includes('@')) {
-        const q2 = query(membersRef, where("email", "==", email))
-        const snap2 = await getDocs(q2)
-        if (!snap2.empty) foundMember = true;
+      
+      for (const doc of snap.docs) {
+        const data = doc.data()
+        const memberEmail = (data.email || "").toLowerCase().trim()
+        const inputEmail = (email || "").toLowerCase().trim()
+        const memberContact = (data.contactNumber || "").replace(/[^0-9]/g, '')
+        const inputContact = (contactNumber || "").replace(/[^0-9]/g, '')
+        
+        if (hasValidContact && memberContact && memberContact === inputContact) {
+          foundMember = true;
+          break;
+        }
+        
+        if (hasValidEmail && memberEmail && memberEmail === inputEmail) {
+          foundMember = true;
+          break;
+        }
       }
       
       if (foundMember) {
@@ -156,7 +166,7 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
   // 3. Handle Form Submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!session || !file || !refNumber || !name || !contactNumber || !email) return;
+    if (!session || !file || !refNumber || !name || (!contactNumber && !email)) return;
 
     setSubmitting(true)
     try {
@@ -338,10 +348,10 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
+                <Label htmlFor="email">Email Address {!contactNumber && "*"}</Label>
                 <Input 
                   id="email" 
-                  required
+                  required={!contactNumber}
                   type="email"
                   placeholder="juan@example.com"
                   className="bg-muted/30 border-muted-foreground/20 focus-visible:ring-primary/50"
@@ -352,15 +362,18 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="contact">Contact Number *</Label>
+                <Label htmlFor="contact">Contact Number {!email && "*"}</Label>
                 <Input 
                   id="contact" 
-                  required
+                  required={!email}
                   type="tel"
                   placeholder="09123456789"
                   className="bg-muted/30 border-muted-foreground/20 focus-visible:ring-primary/50"
                   value={contactNumber}
-                  onChange={(e) => setContactNumber(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, '');
+                    setContactNumber(val);
+                  }}
                   onBlur={checkMembership}
                 />
                 <p className="text-xs text-muted-foreground">Used to verify your member discount.</p>
@@ -368,17 +381,17 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
 
               <div className="t-input-wrap space-y-2" ref={gcashWrapRef}>
                 <Label htmlFor="refNumber">GCash Reference Number *</Label>
-                <div className="t-input rounded-md border border-input transition-colors overflow-hidden" ref={gcashInputRef}>
+                <div className="t-input rounded-md border border-muted-foreground/20 bg-muted/30 transition-colors overflow-hidden focus-within:ring-1 focus-within:ring-primary/50" ref={gcashInputRef}>
                   <Input 
                     id="refNumber" 
                     placeholder="000 000 000 000"
                     required
                     value={refNumber}
                     onChange={handleGcashChange}
-                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-muted/30"
+                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
                   />
                 </div>
-                <p className="t-error-msg text-xs text-destructive mt-1 font-medium">{gcashError}</p>
+                {gcashError && <p className="t-error-msg text-xs text-destructive font-medium m-0">{gcashError}</p>}
                 <p className="text-xs text-muted-foreground">
                   Make sure you have correctly input the GCash reference number before submitting.
                 </p>

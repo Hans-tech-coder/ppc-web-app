@@ -62,28 +62,28 @@ export default function VenuesPage() {
         </Button>
       </div>
 
-      <div className={cn("rounded-md border t-skel relative overflow-hidden", !loading && "is-revealed")}>
+      <div className={cn("md:rounded-md md:border t-skel relative md:overflow-hidden", !loading && "is-revealed")}>
         
         {/* Skeleton Layer */}
-        <div className="t-skel-skeleton is-pulsing pointer-events-none p-4 space-y-4 bg-card">
+        <div className="t-skel-skeleton is-pulsing pointer-events-none p-4 space-y-4 bg-card w-full overflow-hidden">
           <div className="flex gap-4 border-b pb-4">
-            <div className="h-4 w-32 bg-muted rounded"></div>
-            <div className="h-4 w-48 bg-muted rounded"></div>
-            <div className="h-4 w-16 bg-muted rounded ml-auto"></div>
-            <div className="h-4 w-16 bg-muted rounded"></div>
+            <div className="h-4 w-32 bg-muted rounded shrink-0"></div>
+            <div className="h-4 w-48 bg-muted rounded hidden sm:block shrink-0"></div>
+            <div className="h-4 w-16 bg-muted rounded ml-auto shrink-0"></div>
+            <div className="h-4 w-16 bg-muted rounded hidden sm:block shrink-0"></div>
           </div>
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="flex gap-4 border-b pb-4">
-              <div className="h-4 w-32 bg-muted/60 rounded"></div>
-              <div className="h-4 w-48 bg-muted/60 rounded"></div>
-              <div className="h-4 w-16 bg-muted/60 rounded ml-auto"></div>
-              <div className="h-4 w-16 bg-muted/60 rounded"></div>
+              <div className="h-4 w-32 bg-muted/60 rounded shrink-0"></div>
+              <div className="h-4 w-48 bg-muted/60 rounded hidden sm:block shrink-0"></div>
+              <div className="h-4 w-16 bg-muted/60 rounded ml-auto shrink-0"></div>
+              <div className="h-4 w-16 bg-muted/60 rounded hidden sm:block shrink-0"></div>
             </div>
           ))}
         </div>
 
-        {/* Content Layer */}
-        <div className="t-skel-content">
+        {/* Desktop Table Layout */}
+        <div className="t-skel-content hidden md:block">
           <Table>
             <TableHeader>
               <TableRow>
@@ -110,7 +110,7 @@ export default function VenuesPage() {
                   <TableCell className="font-medium">{venue.name}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="truncate max-w-[200px] md:max-w-[400px]">{venue.address}</span>
+                      <span className="truncate max-w-[400px]">{venue.address}</span>
                       {venue.mapsLink && (
                         <a href={venue.mapsLink} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                           <MapPin className="h-4 w-4" />
@@ -129,6 +129,44 @@ export default function VenuesPage() {
             )}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Mobile Card Layout */}
+        <div className="t-skel-content md:hidden py-2">
+          {loading ? (
+             <div className="text-center h-48 opacity-0">Loading...</div>
+          ) : venues.length === 0 ? (
+            <div className="text-center h-24 text-muted-foreground pt-8">
+              No venues found. Add one to get started.
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {venues.map((venue) => (
+                <div key={venue.id} className="bg-card border rounded-xl p-4 shadow-sm flex flex-col gap-3 relative">
+                  <div>
+                    <h3 className="font-semibold text-lg">{venue.name}</h3>
+                    <div className="flex items-start gap-2 mt-1.5 text-muted-foreground text-sm">
+                      <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+                      <span className="leading-snug">{venue.address}</span>
+                      {venue.mapsLink && (
+                        <a href={venue.mapsLink} target="_blank" rel="noreferrer" className="shrink-0 text-primary hover:text-primary/80 transition-colors ml-1 mt-0.5">
+                          Open
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t">
+                    <div className="text-sm font-medium">
+                      {venue.courts} {venue.courts === 1 ? 'Court' : 'Courts'}
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(venue)} className="h-8 rounded-lg px-4">
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
