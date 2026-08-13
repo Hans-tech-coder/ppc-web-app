@@ -6,7 +6,7 @@ import { collection, onSnapshot, query, orderBy, Timestamp } from "firebase/fire
 import { db } from "@/lib/firebase"
 import { SessionForm } from "@/components/admin/session-form"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, formatTime } from "@/lib/utils"
 import {
   Table,
   TableCell,
@@ -81,8 +81,8 @@ export default function SessionsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
-              <TableHead>Time</TableHead>
-              <TableHead>Venue</TableHead>
+              <TableHead className="hidden md:table-cell">Time</TableHead>
+              <TableHead className="hidden md:table-cell">Venue</TableHead>
               <TableHead className="text-right">Players</TableHead>
               <TableHead className="text-center">Status</TableHead>
               <TableHead className="w-[100px]"></TableHead>
@@ -105,8 +105,8 @@ export default function SessionsPage() {
                   <TableCell className="font-medium">
                     {new Date(session.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                   </TableCell>
-                  <TableCell>{session.startTime} - {session.endTime}</TableCell>
-                  <TableCell>{session.venueName}</TableCell>
+                  <TableCell className="hidden md:table-cell">{formatTime(session.startTime)} - {formatTime(session.endTime)}</TableCell>
+                  <TableCell className="hidden md:table-cell">{session.venueName}</TableCell>
                   <TableCell className="text-right">
                     {session.registeredCount} / {session.maxPlayers}
                   </TableCell>

@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label"
 import { GCashModal } from "@/components/public/gcash-modal"
 import { MapModal } from "@/components/public/map-modal"
 import { useAlert } from "@/components/alert-provider"
+import { formatTime } from "@/lib/utils"
 import { CalendarDays, Clock, MapPin, Loader2, Info } from "lucide-react"
 
 export default function RegisterPage(props: { params: Promise<{ sessionId: string }> }) {
@@ -199,8 +200,8 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-6">
-      <Card>
+    <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6">
+      <Card className="rounded-2xl border-border/50">
         <CardHeader className="border-b border-dashed border-border/50">
           <CardTitle className="text-2xl text-primary">Register for Open Play</CardTitle>
           <CardDescription>Fill out the form and upload your GCash payment proof to secure your spot.</CardDescription>
@@ -226,7 +227,7 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                <span className="text-foreground">{session.startTime} - {session.endTime}</span>
+                <span className="text-foreground">{formatTime(session.startTime)} - {formatTime(session.endTime)}</span>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground mt-4">
                 <Info className="h-4 w-4 text-primary" />
@@ -246,7 +247,7 @@ export default function RegisterPage(props: { params: Promise<{ sessionId: strin
 
           {/* Registration Form */}
           <div className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name *</Label>
                 <Input 

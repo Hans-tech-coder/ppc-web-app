@@ -29,14 +29,22 @@ export default function AdminLayout({
 
   return (
     <AdminGuard>
-      <div className="min-h-screen flex flex-col md:flex-row bg-background">
-        {/* Sidebar */}
-        <aside className="w-full md:w-64 border-r border-border/50 bg-card flex flex-col">
+      <div className="min-h-[100dvh] flex flex-col bg-background pb-[calc(env(safe-area-inset-bottom)+64px)] md:pb-0">
+        {/* Mobile Header */}
+        <header className="md:hidden flex items-center justify-between p-4 border-b border-border/50 bg-card sticky top-0 z-40">
+          <h2 className="text-lg font-bold text-primary tracking-tight">PPC Admin</h2>
+          <Button variant="ghost" size="icon" onClick={() => signOut()} className="text-muted-foreground hover:text-foreground h-8 w-8">
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </header>
+
+        {/* Desktop Sidebar */}
+        <aside className="hidden md:flex w-64 border-r border-border/50 bg-card flex-col fixed inset-y-0 left-0 z-40">
           <div className="p-6 border-b border-border/50">
             <h2 className="text-xl font-bold text-primary tracking-tight">PPC Admin</h2>
           </div>
           
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href
@@ -46,20 +54,20 @@ export default function AdminLayout({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm font-medium",
+                    "flex items-center gap-3 px-3 py-3 rounded-xl transition-colors text-sm font-medium",
                     isActive 
                       ? "bg-secondary text-foreground shadow-sm border border-border/50" 
                       : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                   )}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-5 w-5" />
                   {item.label}
                 </Link>
               )
             })}
           </nav>
 
-          <div className="p-4 border-t border-border/50 mt-auto">
+          <div className="p-4 border-t border-border/50">
             <div className="mb-4 px-2">
               <p className="text-xs text-muted-foreground truncate" title={user?.email || ''}>
                 {user?.email}
@@ -76,8 +84,32 @@ export default function AdminLayout({
           </div>
         </aside>
 
+        {/* Mobile Bottom Navigation */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border/50 bg-card z-50 flex items-center justify-around px-2 py-2 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
+          {navItems.map((item) => {
+            const Icon = item.icon
+            const isActive = pathname === item.href
+            
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center gap-1 p-2 min-w-[64px] transition-colors rounded-lg",
+                  isActive 
+                    ? "text-primary" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/30"
+                )}
+              >
+                <Icon className={cn("h-5 w-5", isActive && "fill-primary/20")} />
+                <span className="text-[10px] font-medium">{item.label}</span>
+              </Link>
+            )
+          })}
+        </nav>
+
         {/* Main Content */}
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-8 md:pl-[17rem] w-full max-w-full overflow-x-hidden">
           {children}
         </main>
       </div>

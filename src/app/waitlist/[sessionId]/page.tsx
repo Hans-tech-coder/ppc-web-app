@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAlert } from "@/components/alert-provider"
+import { formatTime } from "@/lib/utils"
 import { CalendarDays, Clock, MapPin, Loader2 } from "lucide-react"
 
 export default function WaitlistPage(props: { params: Promise<{ sessionId: string }> }) {
@@ -84,8 +85,8 @@ export default function WaitlistPage(props: { params: Promise<{ sessionId: strin
   }
 
   return (
-    <div className="max-w-xl mx-auto py-12 px-6">
-      <Card>
+    <div className="max-w-xl mx-auto py-12 px-4 sm:px-6">
+      <Card className="rounded-2xl border-border/50">
         <CardHeader className="bg-muted/50 border-b border-dashed text-center">
           <CardTitle className="text-2xl text-primary">Join the Waitlist</CardTitle>
           <CardDescription>
@@ -107,12 +108,12 @@ export default function WaitlistPage(props: { params: Promise<{ sessionId: strin
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-primary" />
-                <span>{session.startTime} - {session.endTime}</span>
+                <span>{formatTime(session.startTime)} - {formatTime(session.endTime)}</span>
               </div>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+          <form onSubmit={handleSubmit} className="space-y-6 pt-4">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name *</Label>
               <Input 

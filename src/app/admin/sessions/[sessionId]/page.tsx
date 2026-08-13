@@ -7,7 +7,7 @@ import { doc, getDoc, collection, query, where, onSnapshot, updateDoc, runTransa
 import { db } from "@/lib/firebase"
 import { Session } from "@/app/admin/sessions/page"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, formatTime } from "@/lib/utils"
 import {
   Table,
   TableCell,
@@ -228,7 +228,7 @@ export default function SessionDashboard(props: { params: Promise<{ sessionId: s
             </div>
             <div className="flex items-center gap-3 text-sm">
               <Clock className="h-4 w-4 text-primary" />
-              <span>{session.startTime} - {session.endTime}</span>
+              <span>{formatTime(session.startTime)} - {formatTime(session.endTime)}</span>
             </div>
             <div className="flex items-center gap-3 text-sm font-semibold">
               <Users className="h-4 w-4 text-primary" />
@@ -332,7 +332,7 @@ export default function SessionDashboard(props: { params: Promise<{ sessionId: s
                         <TableCell className="text-right space-x-2">
                           {(reg.status === 'PENDING' || reg.status === 'ACTION_REQUIRED') && (
                             <>
-                              <Button variant="default" size="sm" onClick={() => handleApprove(reg.id)} className="bg-green-600 hover:bg-green-700">Approve</Button>
+                              <Button variant="default" size="sm" onClick={() => handleApprove(reg.id)}>Approve</Button>
                               <Button variant="outline" size="sm" onClick={() => {
                                 setMessagingReg(reg)
                                 setMessageContent(reg.adminMessage || "")

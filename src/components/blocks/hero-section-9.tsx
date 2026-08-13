@@ -22,7 +22,7 @@ export const HeroSection = () => {
                                 <span className="font-bold text-lg hidden sm:block text-white">Paniqui Pickleball</span>
                             </Link>
 
-                            <Link href="/admin/login" className={cn(buttonVariants({ size: "sm", variant: "default" }), "bg-primary/20 text-primary border border-primary/20 hover:bg-primary/30 transition-colors")}>
+                            <Link href="/admin/login" className={cn(buttonVariants({ size: "sm", variant: "neon" }), "rounded-full px-4 font-medium")}>
                                 <span>Admin Login</span>
                             </Link>
                         </div>
@@ -53,10 +53,10 @@ export const HeroSection = () => {
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                                <a href="https://forms.gle/ziKdZ9eqM8fRVaDy7" target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ size: "lg", variant: "neon" }), "px-8 py-6 text-lg font-bold rounded-full w-full sm:w-auto")}>
+                                <a href="https://forms.gle/ziKdZ9eqM8fRVaDy7" target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ size: "lg", variant: "neon" }), "w-full sm:w-auto text-lg font-bold px-8 h-14 rounded-full")}>
                                     Join Us
                                 </a>
-                                <Link href="#sessions" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "px-8 py-6 text-lg font-semibold rounded-full w-full sm:w-auto border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors")}>
+                                <Link href="#sessions" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "w-full sm:w-auto text-lg font-semibold px-8 h-14 rounded-full border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors")}>
                                     View Schedule
                                 </Link>
                             </div>

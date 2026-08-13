@@ -7,7 +7,7 @@ import { db } from "@/lib/firebase"
 import { Session } from "@/app/admin/sessions/page"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, formatTime } from "@/lib/utils"
 import {
   Table,
   TableCell,
@@ -188,7 +188,7 @@ export default function AdminDashboard() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Player</TableHead>
-                    <TableHead>Session</TableHead>
+                    <TableHead className="hidden md:table-cell">Session</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
@@ -197,7 +197,7 @@ export default function AdminDashboard() {
                   {needsAttentionRegs.slice(0, 5).map((reg) => (
                     <TableRow key={reg.id}>
                       <TableCell className="font-medium">{reg.name}</TableCell>
-                      <TableCell className="text-muted-foreground text-xs">
+                      <TableCell className="text-muted-foreground text-xs hidden md:table-cell">
                         {new Date(reg.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </TableCell>
                       <TableCell>
@@ -241,7 +241,7 @@ export default function AdminDashboard() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Date</TableHead>
-                    <TableHead>Venue</TableHead>
+                    <TableHead className="hidden md:table-cell">Venue</TableHead>
                     <TableHead>Fill Rate</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
@@ -253,9 +253,9 @@ export default function AdminDashboard() {
                         <div className="font-medium">
                           {new Date(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </div>
-                        <div className="text-xs text-muted-foreground">{session.startTime}</div>
+                        <div className="text-xs text-muted-foreground">{formatTime(session.startTime)}</div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-xs truncate max-w-[100px]" title={session.venueName}>
+                      <TableCell className="text-muted-foreground text-xs truncate max-w-[100px] hidden md:table-cell" title={session.venueName}>
                         {session.venueName}
                       </TableCell>
                       <TableCell>

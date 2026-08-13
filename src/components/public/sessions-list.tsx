@@ -6,7 +6,7 @@ import { db } from "@/lib/firebase"
 import { Session } from "@/app/admin/sessions/page"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, formatTime } from "@/lib/utils"
 import { CalendarDays, Clock, MapPin, Users } from "lucide-react"
 import Link from "next/link"
 
@@ -70,7 +70,7 @@ export function SessionsList() {
             <CardContent className="flex-1 space-y-3">
               <div className="flex items-center gap-2 text-sm text-zinc-300">
                 <Clock className="h-4 w-4 text-primary" />
-                <span>{session.startTime} - {session.endTime}</span>
+                <span>{formatTime(session.startTime)} - {formatTime(session.endTime)}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-zinc-300">
                 <Users className="h-4 w-4 text-primary" />
