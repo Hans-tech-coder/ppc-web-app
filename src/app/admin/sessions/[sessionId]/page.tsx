@@ -100,7 +100,30 @@ export default function SessionDashboard(props: { params: Promise<{ sessionId: s
       const regsQuery = query(collection(db, "registrations"), where("sessionId", "==", params.sessionId));
       unsubRegs = onSnapshot(regsQuery, (snap) => {
         const regs: Registration[] = [];
-        snap.forEach(doc => regs.push({ id: doc.id, ...doc.data() } as Registration));
+        let validCount = 0;
+        snap.forEach(doc => {
+          const data = doc.data();
+          regs.push({ id: doc.id, ...data } as Registration);
+          if (data.status !== "REJECTED") {
+            validCount++;
+          }
+        });
+
+        // Auto-sync session count if out of sync (e.g. from manual DB deletion)
+        const sessionRef = doc(db, "sessions", params.sessionId);
+        getDoc(sessionRef).then((sessionDoc) => {
+          if (sessionDoc.exists()) {
+            const sData = sessionDoc.data() as Session;
+            if (sData.registeredCount !== validCount) {
+              const newStatus = validCount >= sData.maxPlayers ? "FULL" : "OPEN";
+              updateDoc(sessionRef, { 
+                registeredCount: validCount,
+                status: sData.status === "CLOSED" ? "CLOSED" : newStatus
+              }).catch(console.error);
+            }
+          }
+        });
+
         // Sort by created at descending
         regs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setRegistrations(regs);

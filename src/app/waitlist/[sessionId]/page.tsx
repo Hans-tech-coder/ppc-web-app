@@ -180,7 +180,7 @@ export default function WaitlistPage(props: { params: Promise<{ sessionId: strin
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="contact">Contact Number (For Messenger) *</Label>
+                      <Label htmlFor="contact">Contact Number *</Label>
                       <Input 
                         id="contact" 
                         required
