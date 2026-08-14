@@ -54,9 +54,12 @@ export const HeroSection = () => {
                                 <a href="https://forms.gle/ziKdZ9eqM8fRVaDy7" target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ size: "lg", variant: "neon" }), "w-full sm:w-auto text-lg font-bold px-8 h-14 rounded-full")}>
                                     Join Us
                                 </a>
-                                <Link href="#sessions" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "w-full sm:w-auto text-lg font-semibold px-8 h-14 rounded-full border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors")}>
+                                <a href="#sessions" onClick={(e) => {
+                                    e.preventDefault();
+                                    document.getElementById('sessions')?.scrollIntoView({ behavior: 'smooth' });
+                                }} className={cn(buttonVariants({ size: "lg", variant: "outline" }), "w-full sm:w-auto text-lg font-semibold px-8 h-14 rounded-full border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors")}>
                                     View Schedule
-                                </Link>
+                                </a>
                             </div>
                         </div>
 
