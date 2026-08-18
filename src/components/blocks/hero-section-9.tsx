@@ -51,7 +51,7 @@ export const HeroSection = () => {
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                                <a href="https://forms.gle/ziKdZ9eqM8fRVaDy7" target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ size: "lg", variant: "neon" }), "w-full sm:w-auto text-lg font-bold px-8 h-14 rounded-full")}>
+                                <a href="https://forms.gle/ziKdZ9eqM8fRVaDy7" target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ size: "lg", variant: "neon" }), "hidden w-full sm:w-auto text-lg font-bold px-8 h-14 rounded-full")}>
                                     Join Us
                                 </a>
                                 <a href="#sessions" onClick={(e) => {
